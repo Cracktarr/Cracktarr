@@ -8,10 +8,10 @@ import {
   TouchableOpacity,
   ViewStyle,
 } from "react-native";
-import i18n from "i18n-js";
 import { moderateScale, ScaledSheet } from "react-native-size-matters";
 import Colors from "../constants/Colors";
 import { Text, View } from "./Themed";
+import { useTranslation } from "react-i18next";
 
 type SearchBarParamsType = {
   wrapperInputStyle?: StyleProp<ViewStyle>;
@@ -22,6 +22,7 @@ type SearchBarParamsType = {
 export default function SearchBar(
   params: SearchBarParamsType,
 ): JSX.Element | null {
+  const { t } = useTranslation();
   const [showCancel, setShowCancel] = useState(false);
   const [showReset, setShowReset] = useState(false);
   const [value, setValue] = useState("");
@@ -68,7 +69,7 @@ export default function SearchBar(
           value={value}
           onFocus={animateCancelButton}
           onEndEditing={animateCancelButton}
-          placeholder={i18n.t("search")}
+          placeholder={t("search")}
           placeholderTextColor={Colors.dark.grey}
           style={[styles.input, params.textInputStyle]}
           onChangeText={updateText}
@@ -88,7 +89,7 @@ export default function SearchBar(
           style={{ justifyContent: "center" }}
           onPress={() => textInput.current?.blur()}
         >
-          <Text style={styles.cancelText}>Annuler</Text>
+          <Text style={styles.cancelText}>{t("cancel")}</Text>
         </TouchableOpacity>
       )}
     </View>

@@ -19,7 +19,7 @@ func Get(db *gorm.DB, tmdbClient *tmdb.Client) gin.HandlerFunc {
 		// If an id is specified, we look for it in the database,
 		// else, we return the whole list of movies.
 		if len(rawID) > 0 {
-			var movie = new(Movie)
+			var movie Movie
 
 			ID, err := strconv.Atoi(rawID)
 			if err != nil {
@@ -36,11 +36,11 @@ func Get(db *gorm.DB, tmdbClient *tmdb.Client) gin.HandlerFunc {
 
 			// If we get a result, we update the data with a request to TheMovieDB
 			if result.RowsAffected > 0 {
-				err = movie.UpdateMovieMetadata(db, tmdbClient)
+				/*err = movie.UpdateMovieMetadata(db, tmdbClient)
 				if err != nil {
 					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 					return
-				}
+				}*/
 
 				c.JSON(http.StatusOK, movie)
 			} else {

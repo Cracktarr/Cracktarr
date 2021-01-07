@@ -23,7 +23,7 @@ func (m *Movie) GetMovieVideos(c *tmdb.Client) error {
 
 		newVideo.Iso639_1 = video.Iso639_1
 		newVideo.Iso3166_1 = video.Iso3166_1
-		newVideo.ID = video.Key
+		newVideo.Key = video.Key
 		newVideo.Name = video.Name
 		newVideo.Site = video.Site
 		newVideo.Size = video.Size

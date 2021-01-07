@@ -2,8 +2,7 @@ import axios from "axios";
 import { Movie } from "../models/Movie";
 import { SearchMovieResponse } from "../models/response/SearchMovieResponse";
 import { Statistics } from "../models/Statistics";
-
-const BASE_URL = "http://:2343/api";
+import { BASE_URL } from "@env";
 
 export const searchMovies = (text: string): Promise<Movie[]> => {
   return new Promise<Movie[]>((resolve, reject) => {

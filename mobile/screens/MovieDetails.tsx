@@ -1,9 +1,10 @@
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useState } from "react";
 import {
   Image,
   ImageBackground,
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -13,6 +14,10 @@ import { ScaledSheet } from "react-native-size-matters";
 import { Text, View } from "../components/Themed";
 import Colors from "../constants/Colors";
 import { MovieDetailsScreenRouteProp } from "../types";
+import moment from "moment";
+import { getFormattedRuntime } from "../utils/Formatting";
+import { BadgeList } from "../components/Badge";
+import DetailsTabs from "../components/DetailsTabs";
 
 type Props = {
   route: MovieDetailsScreenRouteProp;
@@ -20,7 +25,54 @@ type Props = {
 
 export default function MovieDetails({ route }: Props): JSX.Element | null {
   const { movie } = route.params;
-  const { poster_path, backdrop_path, title } = movie;
+  const {
+    poster_path,
+    backdrop_path,
+    title,
+    videos,
+    release_date,
+    runtime,
+    lezarr_status,
+    language,
+    resolution,
+    genres,
+  } = movie;
+
+  movie.videos = [
+    {
+      id: "105",
+      iso_639_1: "en",
+      iso_3166_1: "US",
+      key: "qvsgGtivCgs",
+      name:
+        "Back To The Future (1985) Theatrical Trailer - Michael J. Fox Movie HD",
+      site: "YouTube",
+      size: 720,
+      type: "Trailer",
+      url: "https://www.youtube.com/watch?v=qvsgGtivCgs",
+    },
+  ];
+
+  movie.genres = [
+    {
+      id: 12,
+      name: "Adventure",
+    },
+    {
+      id: 35,
+      name: "Comedy",
+    },
+    {
+      id: 878,
+      name: "Science Fiction",
+    },
+    {
+      id: 10751,
+      name: "Family",
+    },
+  ];
+
+  const [currentTab, setCurrentTab] = useState(0);
 
   const renderHeader = () => {
     return (
@@ -66,9 +118,36 @@ export default function MovieDetails({ route }: Props): JSX.Element | null {
               style={[StyleSheet.absoluteFill]}
             />
             <Text style={styles.movieTitle}>{title}</Text>
-            <TouchableOpacity style={styles.downloadButton}>
-              <Text style={styles.downloadText}>DOWNLOAD</Text>
-            </TouchableOpacity>
+            {videos && videos?.length > 0 && (
+              <TouchableOpacity style={styles.downloadButton}>
+                <Text
+                  style={styles.downloadText}
+                  onPress={() => Linking.openURL(videos[0].url)}
+                >
+                  TRAILER
+                </Text>
+              </TouchableOpacity>
+            )}
+            <Text style={styles.desc}>
+              {release_date ? moment(release_date).year() : "N/A"} •{" "}
+              {getFormattedRuntime(runtime)} •{" "}
+              {genres && genres.length > 0
+                ? genres
+                    .map((g) => g.name)
+                    .splice(0, 4)
+                    .join(", ")
+                : "N/A"}
+            </Text>
+            <BadgeList
+              status={lezarr_status}
+              resolution={resolution}
+              language={language}
+            />
+            <DetailsTabs
+              tabs={["details", "search", "history"]}
+              currentTab={currentTab}
+              handleTabChange={(i) => setCurrentTab(i)}
+            />
           </BlurView>
         </View>
       </View>
@@ -97,17 +176,23 @@ const styles = ScaledSheet.create({
   movieTitle: {
     fontSize: "24@ms0.3",
     fontWeight: "600",
-    marginBottom: "16@ms0.3",
+    marginBottom: "10@ms0.3",
   },
   downloadButton: {
     backgroundColor: "white",
     padding: 12,
     alignSelf: "baseline",
     borderRadius: 4,
+    marginBottom: "10@ms0.3",
   },
   downloadText: {
     color: Colors.dark.secondary,
     fontWeight: "bold",
     fontSize: 13,
+  },
+  desc: {
+    fontSize: "10@ms0.3",
+    fontWeight: "600",
+    marginBottom: "10@ms0.3",
   },
 });

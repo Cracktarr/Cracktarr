@@ -41,6 +41,7 @@ export default function HomeScreen(): JSX.Element | null {
       const stats = await getLezarrStatistics();
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setStats(stats);
+      setShowError(false);
     } catch (err) {
       return;
     }

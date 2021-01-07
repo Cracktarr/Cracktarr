@@ -5,48 +5,12 @@ import { moderateScale, ScaledSheet } from "react-native-size-matters";
 import Colors from "../constants/Colors";
 import { Movie } from "../models/Movie";
 import { MovieDetailsScreenNavigationProp } from "../types";
-import Badge from "./Badge";
 import { Text } from "./Themed";
+import { BadgeList } from "./Badge";
 
 type MovieCardParamsType = {
   movie: Movie;
   onPress?: () => void;
-};
-
-const badgeList = (status: string, resolution: number, language: string) => {
-  return (
-    <View style={{ flexDirection: "row", marginBottom: moderateScale(4) }}>
-      {status !== "" && (
-        <Badge
-          title={status}
-          style={{
-            backgroundColor:
-              status === "missing" ? Colors.dark.red : Colors.dark.tint,
-          }}
-        />
-      )}
-      {resolution !== 0 && (
-        <Badge
-          title={`${resolution}p`}
-          style={{
-            marginLeft: 4,
-            borderColor: Colors.dark.grey,
-            borderWidth: moderateScale(2, 0.05),
-          }}
-        />
-      )}
-      {language !== "" && (
-        <Badge
-          title={language}
-          style={{
-            marginLeft: 4,
-            borderColor: Colors.dark.grey,
-            borderWidth: moderateScale(2, 0.05),
-          }}
-        />
-      )}
-    </View>
-  );
 };
 
 export default function MovieCard(
@@ -106,7 +70,11 @@ export default function MovieCard(
           {release_date || "N/A"} •{" "}
           {vote_average ? `${Math.round(vote_average * 10)}%` : "N/A"}
         </Text>
-        {badgeList(lezarr_status, resolution, language)}
+        <BadgeList
+          status={lezarr_status}
+          resolution={resolution}
+          language={language}
+        />
         <Text style={[styles.desc, { flex: 1 }]} ellipsizeMode="tail">
           {overview}
         </Text>

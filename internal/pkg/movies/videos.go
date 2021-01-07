@@ -20,7 +20,7 @@ func (m *Movie) GetMovieVideos(c *tmdb.Client) error {
 
 	m.Videos = nil
 	for _, video := range videosFromTMDB.Results {
-		var newVideo MovieVideos
+		var newVideo Video
 
 		newVideo.Iso639_1 = video.Iso639_1
 		newVideo.Iso3166_1 = video.Iso3166_1

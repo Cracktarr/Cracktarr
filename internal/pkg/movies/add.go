@@ -68,7 +68,6 @@ func Add(db *gorm.DB, tmdbClient *tmdb.Client) gin.HandlerFunc {
 		movie.LezarrStatus = "missing"
 
 		// Add the movie to the database
-		db.Model(&movie).Association("Genres")
 		result = db.Create(&movie)
 		if result.Error != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": result.Error})

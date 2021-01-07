@@ -81,35 +81,16 @@ func Get(db *gorm.DB, tmdbClient *tmdb.Client) gin.HandlerFunc {
 			}
 
 			if len(sortQuery) > 0 {
-				result := db.Order(sortQuery).Offset(offset).Limit(limit).Find(&movies)
+				result := db.Preload(clause.Associations).Order(sortQuery).Offset(offset).Limit(limit).Find(&movies)
 				if result.Error != nil {
 					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 					return
-				}
-
-				// I think there is a cleaner way to do the whole thing here,
-				// I didn't find how to preload when using []Movies.
-				// Same goes for the else below.
-				for i, movie := range movies {
-					result = db.Preload(clause.Associations).Find(&movies[i], movie.ID)
-					if result.Error != nil {
-						c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
-						return
-					}
 				}
 			} else {
-				result := db.Offset(offset).Limit(limit).Find(&movies)
+				result := db.Preload(clause.Associations).Offset(offset).Limit(limit).Find(&movies)
 				if result.Error != nil {
 					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 					return
-				}
-
-				for i, movie := range movies {
-					result = db.Preload(clause.Associations).Find(&movies[i], movie.ID)
-					if result.Error != nil {
-						c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
-						return
-					}
 				}
 			}
 

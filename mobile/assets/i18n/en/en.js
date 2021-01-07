@@ -1,8 +1,8 @@
 export const en = {
   //Global
-  ok: "ok",
-  yes: "yes",
-  cancel: "cancel",
+  ok: "Ok",
+  yes: "Yes",
+  cancel: "Cancel",
 
   //Error messages
   network_error:

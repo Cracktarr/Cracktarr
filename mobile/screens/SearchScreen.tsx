@@ -7,7 +7,6 @@ import {
   SafeAreaView,
   StatusBar,
 } from "react-native";
-import i18n from "i18n-js";
 import { moderateScale, ScaledSheet } from "react-native-size-matters";
 import { useDebouncedCallback } from "use-debounce/lib";
 import { addMovie, searchMovies } from "../api/api";
@@ -16,8 +15,10 @@ import SearchBar from "../components/SearchBar";
 import { Text, View } from "../components/Themed";
 import { Movie } from "../models/Movie";
 import Colors from "../constants/Colors";
+import { useTranslation } from "react-i18next";
 
 export default function SearchScreen(): JSX.Element | null {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   const [results, setResults] = useState<Movie[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -52,7 +53,7 @@ export default function SearchScreen(): JSX.Element | null {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setResults(result);
     } catch (err) {
-      alert(i18n.t("failed_add_movie"));
+      alert(t("failed_add_movie"));
       return;
     }
   };
@@ -79,9 +80,7 @@ export default function SearchScreen(): JSX.Element | null {
         onChangeText={onChangeText}
       />
       {!results && (
-        <Text style={styles.placeholderText}>
-          {i18n.t("search_description")}
-        </Text>
+        <Text style={styles.placeholderText}>{t("search_description")}</Text>
       )}
 
       <View style={styles.container}>
@@ -107,13 +106,12 @@ export default function SearchScreen(): JSX.Element | null {
               <MovieCard
                 movie={item}
                 onPress={() =>
-                  Alert.alert(item.title || "", i18n.t("alert_add_movie"), [
+                  Alert.alert(item.title || "", t("alert_add_movie"), [
                     {
-                      text: "Cancel",
-                      style: "cancel",
+                      text: t("cancel"),
                     },
                     {
-                      text: "YES",
+                      text: t("yes"),
                       onPress: () => {
                         addMovieById(item.id);
                       },

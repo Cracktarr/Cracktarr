@@ -8,7 +8,6 @@ import {
   StatusBar,
   TouchableOpacity,
 } from "react-native";
-import i18n from "i18n-js";
 import { moderateScale, ScaledSheet } from "react-native-size-matters";
 import { getLezarrStatistics, getRecentlyAddedMovies } from "../api/api";
 import MovieCard from "../components/MovieCard";
@@ -17,12 +16,15 @@ import { Text, View } from "../components/Themed";
 import Colors from "../constants/Colors";
 import { Movie } from "../models/Movie";
 import { Statistics } from "../models/Statistics";
+import { useTranslation } from "react-i18next";
+import ErrorView from "../components/ErrorView";
 
 export default function HomeScreen(): JSX.Element | null {
   const { navigate } = useNavigation();
+  const { t } = useTranslation();
   const [movies, setMovies] = useState<Movie[] | null>(null);
   const [stats, setStats] = useState<Statistics | null>(null);
-
+  const [loading, setLoading] = useState(true);
   const [showError, setShowError] = useState<boolean>(false);
 
   const getMovies = async () => {
@@ -30,10 +32,12 @@ export default function HomeScreen(): JSX.Element | null {
       const movies = await getRecentlyAddedMovies();
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setMovies(movies);
+      await getStatistics();
       setShowError(false);
     } catch (err) {
       setShowError(true);
     }
+    setLoading(false);
   };
 
   const getStatistics = async () => {
@@ -49,7 +53,6 @@ export default function HomeScreen(): JSX.Element | null {
 
   useFocusEffect(
     useCallback(() => {
-      getStatistics();
       getMovies();
     }, []),
   );
@@ -59,18 +62,18 @@ export default function HomeScreen(): JSX.Element | null {
       <>
         <View>
           <Text>
-            <Text style={styles.title}>{i18n.t("home_title")}</Text>
+            <Text style={styles.title}>{t("home_title")}</Text>
             <Text style={[styles.title, { color: Colors.dark.tint }]}>
               Lezarr
             </Text>
           </Text>
           <Text>
-            {stats?.total_movies} {i18n.t("monitored")}, {stats?.missing_movies}{" "}
-            {i18n.t("missing")}
+            {stats?.total_movies} {t("monitored")}, {stats?.missing_movies}{" "}
+            {t("missing")}
           </Text>
         </View>
 
-        <Text style={styles.sectionTitle}>{i18n.t("recently_downloaded")}</Text>
+        <Text style={styles.sectionTitle}>{t("recently_downloaded")}</Text>
 
         <FlatList
           ItemSeparatorComponent={() => (
@@ -93,7 +96,7 @@ export default function HomeScreen(): JSX.Element | null {
         {movies.filter(
           (value) => new Date(value.release_date || "01/01/1979") > new Date(),
         ).length > 0 && (
-          <Text style={styles.sectionTitle}>{i18n.t("upcoming_movies")}</Text>
+          <Text style={styles.sectionTitle}>{t("upcoming_movies")}</Text>
         )}
         {movies.filter(
           (value) => new Date(value.release_date || "01/01/1979") > new Date(),
@@ -119,12 +122,12 @@ export default function HomeScreen(): JSX.Element | null {
             renderItem={({ item }) => <MoviePoster {...item} />}
           />
         )}
-        <Text style={styles.sectionTitle}>{i18n.t("all_movies")}</Text>
+        <Text style={styles.sectionTitle}>{t("all_movies")}</Text>
       </>
     );
   };
 
-  if (!movies && !showError) {
+  if (loading) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="small" color={Colors.dark.tint} />
@@ -134,16 +137,20 @@ export default function HomeScreen(): JSX.Element | null {
 
   if (showError) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.message}>{i18n.t("network_error")}</Text>
-      </View>
+      <ErrorView
+        title={t("network_error")}
+        onPress={() => {
+          setLoading(true);
+          getMovies();
+        }}
+      />
     );
   }
 
   if (movies?.length === 0) {
     return (
       <View style={styles.container}>
-        <Text style={styles.message}>{i18n.t("empty_lezarr")}</Text>
+        <Text style={styles.message}>{t("empty_lezarr")}</Text>
       </View>
     );
   }

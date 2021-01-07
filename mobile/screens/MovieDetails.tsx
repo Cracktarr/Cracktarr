@@ -18,6 +18,7 @@ import moment from "moment";
 import { getFormattedRuntime } from "../utils/Formatting";
 import { BadgeList } from "../components/Badge";
 import DetailsTabs from "../components/DetailsTabs";
+import MovieInfoView from "../components/MovieInfoView";
 
 type Props = {
   route: MovieDetailsScreenRouteProp;
@@ -37,40 +38,6 @@ export default function MovieDetails({ route }: Props): JSX.Element | null {
     resolution,
     genres,
   } = movie;
-
-  movie.videos = [
-    {
-      id: "105",
-      iso_639_1: "en",
-      iso_3166_1: "US",
-      key: "qvsgGtivCgs",
-      name:
-        "Back To The Future (1985) Theatrical Trailer - Michael J. Fox Movie HD",
-      site: "YouTube",
-      size: 720,
-      type: "Trailer",
-      url: "https://www.youtube.com/watch?v=qvsgGtivCgs",
-    },
-  ];
-
-  movie.genres = [
-    {
-      id: 12,
-      name: "Adventure",
-    },
-    {
-      id: 35,
-      name: "Comedy",
-    },
-    {
-      id: 878,
-      name: "Science Fiction",
-    },
-    {
-      id: 10751,
-      name: "Family",
-    },
-  ];
 
   const [currentTab, setCurrentTab] = useState(0);
 
@@ -144,7 +111,14 @@ export default function MovieDetails({ route }: Props): JSX.Element | null {
               language={language}
             />
             <DetailsTabs
-              tabs={["details", "search", "history"]}
+              tabs={[
+                {
+                  title: "details",
+                  component: <MovieInfoView movie={movie} />,
+                },
+                { title: "search", component: <View /> },
+                { title: "history", component: <View /> },
+              ]}
               currentTab={currentTab}
               handleTabChange={(i) => setCurrentTab(i)}
             />

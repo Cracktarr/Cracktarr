@@ -4,9 +4,14 @@ import { TouchableWithoutFeedback, View } from "react-native";
 import { Text } from "./Themed";
 
 export type Props = {
-  tabs: string[];
+  tabs: Tab[];
   currentTab: number;
   handleTabChange: (i: number) => void;
+};
+
+type Tab = {
+  title: string;
+  component: JSX.Element;
 };
 
 export default function DetailsTabs(params: Props): JSX.Element | null {
@@ -16,7 +21,7 @@ export default function DetailsTabs(params: Props): JSX.Element | null {
       <View style={styles.container}>
         {tabs.map((item, i) => (
           <TouchableWithoutFeedback
-            key={item}
+            key={item.title}
             onPress={() => handleTabChange(i)}
           >
             <View style={styles.item}>
@@ -29,7 +34,7 @@ export default function DetailsTabs(params: Props): JSX.Element | null {
                   },
                 ]}
               >
-                {item.toUpperCase()}
+                {item.title.toUpperCase()}
               </Text>
               <View
                 style={[
@@ -42,6 +47,7 @@ export default function DetailsTabs(params: Props): JSX.Element | null {
         ))}
       </View>
       <View style={styles.bottomLine} />
+      {params.tabs[currentTab].component}
     </View>
   );
 }

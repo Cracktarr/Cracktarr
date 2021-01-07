@@ -18,6 +18,7 @@ func (m *Movie) GetMovieVideos(c *tmdb.Client) error {
 		return err
 	}
 
+	m.Videos = nil
 	for _, video := range videosFromTMDB.Results {
 		var newVideo MovieVideos
 

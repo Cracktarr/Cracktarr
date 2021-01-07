@@ -7,6 +7,7 @@ import (
 	tmdb "github.com/cyruzin/golang-tmdb"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Get return the movie matched with ?id= in the DB if it exists, else
@@ -19,7 +20,7 @@ func Get(db *gorm.DB, tmdbClient *tmdb.Client) gin.HandlerFunc {
 		// If an id is specified, we look for it in the database,
 		// else, we return the whole list of movies.
 		if len(rawID) > 0 {
-			var movie = new(Movie)
+			var movie Movie
 
 			ID, err := strconv.Atoi(rawID)
 			if err != nil {
@@ -28,7 +29,7 @@ func Get(db *gorm.DB, tmdbClient *tmdb.Client) gin.HandlerFunc {
 			}
 
 			// Query the ID from the database
-			result := db.Find(&movie, ID)
+			result := db.Preload(clause.Associations).Find(&movie, ID)
 			if result.Error != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 				return
@@ -85,11 +86,30 @@ func Get(db *gorm.DB, tmdbClient *tmdb.Client) gin.HandlerFunc {
 					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 					return
 				}
+
+				// I think there is a cleaner way to do the whole thing here,
+				// I didn't find how to preload when using []Movies.
+				// Same goes for the else below.
+				for i, movie := range movies {
+					result = db.Preload(clause.Associations).Find(&movies[i], movie.ID)
+					if result.Error != nil {
+						c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+						return
+					}
+				}
 			} else {
 				result := db.Offset(offset).Limit(limit).Find(&movies)
 				if result.Error != nil {
 					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 					return
+				}
+
+				for i, movie := range movies {
+					result = db.Preload(clause.Associations).Find(&movies[i], movie.ID)
+					if result.Error != nil {
+						c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+						return
+					}
 				}
 			}
 

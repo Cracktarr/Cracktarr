@@ -28,13 +28,15 @@ func Init(config *setup.Config) *gin.Engine {
 		moviesAPI := api.Group("/movies")
 		{
 			moviesAPI.GET("/search", movies.Search(config.Database, config.TMDBClient))
-			moviesAPI.POST("/add", movies.Add(config.Database, config.TMDBClient))
-			moviesAPI.GET("/get", movies.Get(config.Database, config.TMDBClient))
+			moviesAPI.POST("", movies.Add(config.Database, config.TMDBClient))
+			moviesAPI.GET("", movies.Get(config.Database, config.TMDBClient))
 		}
 
 		systemAPI := api.Group("/system")
 		{
 			systemAPI.GET("/stats", system.GetStats(config.Database))
+			systemAPI.GET("/config", system.GetConfig(config.Database))
+			systemAPI.POST("/config", system.SetConfig(config.Database))
 		}
 	}
 

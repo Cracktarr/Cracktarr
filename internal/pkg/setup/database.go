@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/Lezarr/Lezarr/internal/pkg/movies"
+	"github.com/Lezarr/Lezarr/internal/pkg/system"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -20,6 +21,11 @@ func (c *Config) initDB() {
 	// Initialise the table if it doesn't exist
 	err = c.Database.AutoMigrate(&movies.Movie{})
 	if err != nil {
-		c.Logger.Fatalln("failed to initialise tables, error:", err.Error())
+		c.Logger.Fatalln("failed to initialise movies table, error:", err.Error())
+	}
+
+	err = c.Database.AutoMigrate(&system.Config{})
+	if err != nil {
+		c.Logger.Fatalln("failed to initialise config table, error:", err.Error())
 	}
 }

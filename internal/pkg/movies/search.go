@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
 
 	tmdb "github.com/cyruzin/golang-tmdb"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Search query the TheMovieDB for the terms specified in ?query=,
@@ -38,10 +38,10 @@ func Search(db *gorm.DB, tmdbClient *tmdb.Client) gin.HandlerFunc {
 		// Match the results with movies in the database,
 		// and add the appropriate fields if movies are in the database
 		for i, result := range searchResults.Results {
-			var resultFromDB = new(Movie)
+			var resultFromDB Movie
 
 			// Query Lezarr DB for each of the results from TheMovieDB
-			result := db.First(&resultFromDB, strconv.Itoa(int(result.ID)), db.Statement.RaiseErrorOnNotFound)
+			result := db.Preload(clause.Associations).Find(&resultFromDB, int(result.ID))
 			if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				c.AbortWithError(http.StatusInternalServerError, result.Error)
 			}
@@ -49,9 +49,7 @@ func Search(db *gorm.DB, tmdbClient *tmdb.Client) gin.HandlerFunc {
 			// If we can find the ID in the local DB, we fill
 			// the appropriate fields in the response
 			if result.RowsAffected > 0 {
-				searchResults.Results[i].LezarrStatus = resultFromDB.LezarrStatus
-				searchResults.Results[i].Resolution = resultFromDB.Resolution
-				searchResults.Results[i].Language = resultFromDB.Language
+				searchResults.Results[i] = resultFromDB
 			}
 		}
 

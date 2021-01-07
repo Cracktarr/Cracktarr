@@ -24,7 +24,7 @@ func Add(db *gorm.DB, tmdbClient *tmdb.Client) gin.HandlerFunc {
 		// If the ID is already in the DB, we just update the movie details
 		result := db.Find(&movie, movie.ID)
 		if result.Error != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": result.Error})
 			return
 		}
 
@@ -74,7 +74,7 @@ func Add(db *gorm.DB, tmdbClient *tmdb.Client) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "added", "id": movie.ID})
+		c.JSON(http.StatusOK, movie)
 	}
 
 	return gin.HandlerFunc(fn)

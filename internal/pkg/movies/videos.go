@@ -18,12 +18,13 @@ func (m *Movie) GetMovieVideos(c *tmdb.Client) error {
 		return err
 	}
 
+	m.Videos = nil
 	for _, video := range videosFromTMDB.Results {
 		var newVideo MovieVideos
 
 		newVideo.Iso639_1 = video.Iso639_1
 		newVideo.Iso3166_1 = video.Iso3166_1
-		newVideo.Key = video.Key
+		newVideo.ID = video.Key
 		newVideo.Name = video.Name
 		newVideo.Site = video.Site
 		newVideo.Size = video.Size

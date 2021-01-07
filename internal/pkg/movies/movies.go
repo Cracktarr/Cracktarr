@@ -19,12 +19,11 @@ type MovieSearchResults struct {
 type MovieVideos struct {
 	gorm.Model `json:"-"`
 
-	MovieID       uint `json:"-"`
-	MovieVideosID uint `json:"-"`
+	MovieID uint `json:"-"`
 
 	Iso639_1  string `json:"iso_639_1"`
 	Iso3166_1 string `json:"iso_3166_1"`
-	Key       string `json:"key"`
+	ID        string `json:"key" gorm:"primarykey"`
 	Name      string `json:"name"`
 	Site      string `json:"site"`
 	Size      int    `json:"size"`
@@ -36,8 +35,7 @@ type MovieVideos struct {
 type MovieGenres struct {
 	gorm.Model `json:"-"`
 
-	MovieID       uint `json:"-"`
-	MovieGenresID uint `json:"-"`
+	MovieID uint `json:"-"`
 
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
@@ -55,13 +53,13 @@ type Movie struct {
 	Score        int       `json:"score"`
 
 	// Custom metadata (data gathered from other endpoints)
-	Videos []MovieVideos `json:"videos" gorm:"many2many:movie_videos;"`
+	Videos []MovieVideos `json:"videos" gorm:"foreignKey:MovieID"`
 
 	// TheMovieDB fields - basically what TMDB returns for a movie
 	Adult            bool          `json:"adult"`
 	BackdropPath     string        `json:"backdrop_path"`
 	Budget           int64         `json:"budget"`
-	Genres           []MovieGenres `json:"genres" gorm:"many2many:movie_genres;"`
+	Genres           []MovieGenres `json:"genres" gorm:"foreignKey:MovieID"`
 	Homepage         string        `json:"homepage"`
 	ID               int64         `json:"id"`
 	IMDbID           string        `json:"imdb_id"`

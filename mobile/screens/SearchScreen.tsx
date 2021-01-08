@@ -16,11 +16,14 @@ import { Text, View } from "../components/Themed";
 import { Movie } from "../models/Movie";
 import Colors from "../constants/Colors";
 import { useTranslation } from "react-i18next";
+import { useNavigation } from "@react-navigation/native";
+import { MovieDetailsScreenNavigationProp } from "../types";
 
 export default function SearchScreen(): JSX.Element | null {
   const { t } = useTranslation();
+  const { navigate } = useNavigation<MovieDetailsScreenNavigationProp>();
   const [text, setText] = useState("");
-  const [results, setResults] = useState<Movie[] | null>(null);
+  const [results, setResults] = useState<Movie[]>(null);
   const [loading, setLoading] = useState(false);
   const debounced = useDebouncedCallback((value) => {
     setText(value);
@@ -45,13 +48,14 @@ export default function SearchScreen(): JSX.Element | null {
     debounced.callback(text);
   };
 
-  const addMovieById = async (id?: number) => {
-    if (!id) throw "id is null";
+  const addMovieById = async (value?: Movie, index: number) => {
+    if (!value) throw "id is null";
     try {
-      await addMovie(id);
-      const result = await searchMovies(text);
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setResults(result);
+      const movie = await addMovie(value);
+      const newResults: Movie[] = [...results];
+      newResults[index] = movie;
+      setResults(newResults);
+      navigate("MovieDetails", { movie });
     } catch (err) {
       alert(t("failed_add_movie"));
       return;
@@ -88,6 +92,7 @@ export default function SearchScreen(): JSX.Element | null {
           <ActivityIndicator size="large" />
         ) : (
           <FlatList
+            keyboardShouldPersistTaps={"always"}
             style={{ paddingHorizontal: 10, paddingVertical: 26, flex: 1 }}
             data={results}
             ItemSeparatorComponent={() => (
@@ -102,22 +107,10 @@ export default function SearchScreen(): JSX.Element | null {
             keyExtractor={(item, index) =>
               item.id?.toString() || index.toString()
             }
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <MovieCard
                 movie={item}
-                onPress={() =>
-                  Alert.alert(item.title || "", t("alert_add_movie"), [
-                    {
-                      text: t("cancel"),
-                    },
-                    {
-                      text: t("yes"),
-                      onPress: () => {
-                        addMovieById(item.id);
-                      },
-                    },
-                  ])
-                }
+                onPress={() => addMovieById(item, index)}
               />
             )}
           />
@@ -131,6 +124,7 @@ const styles = ScaledSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
+    backgroundColor: Colors.dark.background,
   },
   placeholderText: {
     alignSelf: "center",

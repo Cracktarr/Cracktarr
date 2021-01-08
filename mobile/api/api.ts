@@ -2,44 +2,45 @@ import axios from "axios";
 import { Movie } from "../models/Movie";
 import { SearchMovieResponse } from "../models/response/SearchMovieResponse";
 import { Statistics } from "../models/Statistics";
-import { BASE_URL } from "@env";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const searchMovies = (text: string): Promise<Movie[]> => {
-  return new Promise<Movie[]>((resolve, reject) => {
-    axios
-      .get<SearchMovieResponse>(`${BASE_URL}/movies/search`, {
-        params: { query: text },
-      })
-      .then((res) => resolve(res.data.results))
-      .catch((err) => reject(err));
-  });
+export const searchMovies = async (text: string): Promise<Movie[]> => {
+  const BASE_URL = await AsyncStorage.getItem("BASE_URL");
+  const response = await axios.get<SearchMovieResponse>(
+    `${BASE_URL}/api/movies/search`,
+    {
+      params: { query: text },
+    },
+  );
+  return response.data.results;
 };
 
-export const getRecentlyAddedMovies = (): Promise<Movie[]> => {
-  return new Promise<Movie[]>((resolve, reject) => {
-    axios
-      .get<Movie[]>(`${BASE_URL}/movies/get`, {
-        params: { limit: 50, sort: "created_at desc" },
-      })
-      .then((res) => resolve(res.data))
-      .catch((err) => reject(err));
+export const getRecentlyAddedMovies = async (): Promise<Movie[]> => {
+  const BASE_URL = await AsyncStorage.getItem("BASE_URL");
+  const response = await axios.get<Movie[]>(`${BASE_URL}/api/movies`, {
+    params: { limit: 50, sort: "created_at desc" },
   });
+  return response.data;
 };
 
-export const getLezarrStatistics = (): Promise<Statistics> => {
-  return new Promise<Statistics>((resolve, reject) => {
-    axios
-      .get<Statistics>(`${BASE_URL}/system/stats`)
-      .then((res) => resolve(res.data))
-      .catch((err) => reject(err));
+export const getMovieDetails = async (id: number): Promise<Movie> => {
+  const BASE_URL = await AsyncStorage.getItem("BASE_URL");
+  const response = await axios.get<Movie>(`${BASE_URL}/api/movies`, {
+    params: { id },
   });
+  return response.data;
 };
 
-export const addMovie = (id: number): Promise<string> => {
-  return new Promise<string>((resolve, reject) => {
-    axios
-      .get<string>(`${BASE_URL}/movies/add`, { params: { id: id } })
-      .then((res) => resolve(res.data))
-      .catch((err) => reject(err));
+export const getLezarrStatistics = async (): Promise<Statistics> => {
+  const BASE_URL = await AsyncStorage.getItem("BASE_URL");
+  const response = await axios.get<Statistics>(`${BASE_URL}/api/system/stats`, {
+    params: { limit: 50, sort: "created_at desc" },
   });
+  return response.data;
+};
+
+export const addMovie = async (movie: Movie): Promise<Movie> => {
+  const BASE_URL = await AsyncStorage.getItem("BASE_URL");
+  const response = await axios.post<Movie>(`${BASE_URL}/api/movies`, movie);
+  return response.data;
 };

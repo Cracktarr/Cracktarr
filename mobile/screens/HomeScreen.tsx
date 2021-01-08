@@ -1,5 +1,5 @@
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -30,25 +30,15 @@ export default function HomeScreen(): JSX.Element | null {
   const getMovies = async () => {
     try {
       const movies = await getRecentlyAddedMovies();
+      const stats = await getLezarrStatistics();
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setMovies(movies);
-      await getStatistics();
+      setStats(stats);
       setShowError(false);
     } catch (err) {
       setShowError(true);
     }
     setLoading(false);
-  };
-
-  const getStatistics = async () => {
-    try {
-      const stats = await getLezarrStatistics();
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setStats(stats);
-      setShowError(false);
-    } catch (err) {
-      return;
-    }
   };
 
   useFocusEffect(
@@ -127,7 +117,7 @@ export default function HomeScreen(): JSX.Element | null {
     );
   };
 
-  if (loading) {
+  if (loading || !movies) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="small" color={Colors.dark.tint} />

@@ -1,6 +1,7 @@
 import { DarkTheme, NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import * as React from "react";
+import { View } from "../components/Themed";
 import MovieDetails from "../screens/MovieDetails";
 
 import { RootStackParamList } from "../types";
@@ -22,9 +23,11 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Root" component={BottomTabNavigator} />
-      <Stack.Screen name="MovieDetails" component={MovieDetails} />
-    </Stack.Navigator>
+    <View style={{ flex: 1 }}>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Root" component={BottomTabNavigator} />
+        <Stack.Screen name="MovieDetails" component={MovieDetails} />
+      </Stack.Navigator>
+    </View>
   );
 }

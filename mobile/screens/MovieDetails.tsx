@@ -1,9 +1,11 @@
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   ImageBackground,
+  InteractionManager,
+  LayoutAnimation,
   Linking,
   Platform,
   ScrollView,
@@ -19,6 +21,26 @@ import { getFormattedRuntime } from "../utils/Formatting";
 import { BadgeList } from "../components/Badge";
 import DetailsTabs from "../components/DetailsTabs";
 import MovieInfoView from "../components/MovieInfoView";
+import { MaterialIcons } from "@expo/vector-icons";
+import SearchResults, { Result } from "../components/SearchResults";
+import { getMovieDetails } from "../api/api";
+
+const resultsDebug: Result[] = [
+  {
+    title: "Back.To.The.Future.1985.MULTi.2160p.REMUX.DoVi-PEPiTE.mkv",
+    indexer: "YGGTorrent",
+    size: 56.2,
+    peers: 15,
+    leechers: 0,
+  },
+  {
+    title: "Back.To.The.Future.1985.MULTi.1080p.REMUX-PEPiTE.mkv",
+    indexer: "YGGTorrent",
+    size: 26.2,
+    peers: 45,
+    leechers: 0,
+  },
+];
 
 type Props = {
   route: MovieDetailsScreenRouteProp;
@@ -26,6 +48,10 @@ type Props = {
 
 export default function MovieDetails({ route }: Props): JSX.Element | null {
   const { movie } = route.params;
+
+  const [currentTab, setCurrentTab] = useState(0);
+  const [movieDetails, setMovieDetails] = useState(movie);
+
   const {
     poster_path,
     backdrop_path,
@@ -37,9 +63,21 @@ export default function MovieDetails({ route }: Props): JSX.Element | null {
     language,
     resolution,
     genres,
-  } = movie;
+    id,
+  } = movieDetails;
 
-  const [currentTab, setCurrentTab] = useState(0);
+  useEffect(() => {
+    async function getDetails() {
+      try {
+        const details = await getMovieDetails(id);
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setMovieDetails(details);
+      } catch (e) {
+        alert(e);
+      }
+    }
+    InteractionManager.runAfterInteractions(() => getDetails());
+  }, []);
 
   const renderHeader = () => {
     return (
@@ -79,22 +117,16 @@ export default function MovieDetails({ route }: Props): JSX.Element | null {
               colors={[
                 Platform.OS === "android"
                   ? Colors.dark.background
-                  : "rgba(19,33,45,0.4)",
+                  : "transparent",
                 Colors.dark.background,
               ]}
               style={[StyleSheet.absoluteFill]}
             />
             <Text style={styles.movieTitle}>{title}</Text>
-            {videos && videos?.length > 0 && (
-              <TouchableOpacity style={styles.downloadButton}>
-                <Text
-                  style={styles.downloadText}
-                  onPress={() => Linking.openURL(videos[0].url)}
-                >
-                  TRAILER
-                </Text>
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity style={styles.downloadButton}>
+              <MaterialIcons name={"search"} size={18} color={"black"} />
+              <Text style={styles.downloadText}>AUTO SEARCH</Text>
+            </TouchableOpacity>
             <Text style={styles.desc}>
               {release_date ? moment(release_date).year() : "N/A"} •{" "}
               {getFormattedRuntime(runtime)} •{" "}
@@ -114,13 +146,21 @@ export default function MovieDetails({ route }: Props): JSX.Element | null {
               tabs={[
                 {
                   title: "details",
-                  component: <MovieInfoView movie={movie} />,
+                  component: <MovieInfoView movie={movieDetails} />,
                 },
-                { title: "search", component: <View /> },
+                {
+                  title: "search",
+                  component: <SearchResults results={resultsDebug} />,
+                },
                 { title: "history", component: <View /> },
               ]}
               currentTab={currentTab}
-              handleTabChange={(i) => setCurrentTab(i)}
+              handleTabChange={(i) => {
+                LayoutAnimation.configureNext(
+                  LayoutAnimation.Presets.easeInEaseOut,
+                );
+                setCurrentTab(i);
+              }}
             />
           </BlurView>
         </View>
@@ -140,7 +180,7 @@ const styles = ScaledSheet.create({
     height: "280@ms0.2",
   },
   headerImageReverse: {
-    height: "300@ms0.1",
+    height: "280@ms0.2",
     transform: [{ rotateX: "180deg" }],
   },
   header: {
@@ -148,25 +188,27 @@ const styles = ScaledSheet.create({
     backgroundColor: Colors.dark.background,
   },
   movieTitle: {
-    fontSize: "24@ms0.3",
+    fontSize: "24@ms0.1",
     fontWeight: "600",
-    marginBottom: "10@ms0.3",
+    marginBottom: "10@ms0.2",
   },
   downloadButton: {
+    flexDirection: "row",
     backgroundColor: "white",
-    padding: 12,
+    padding: 10,
     alignSelf: "baseline",
     borderRadius: 4,
-    marginBottom: "10@ms0.3",
+    marginBottom: "10@ms0.2",
   },
   downloadText: {
     color: Colors.dark.secondary,
     fontWeight: "bold",
     fontSize: 13,
+    marginLeft: 4,
   },
   desc: {
-    fontSize: "10@ms0.3",
+    fontSize: "10@ms0.2",
     fontWeight: "600",
-    marginBottom: "10@ms0.3",
+    marginBottom: "10@ms0.2",
   },
 });

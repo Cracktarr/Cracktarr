@@ -28,17 +28,17 @@ const DescItem = (params: DescItemProps) => {
 
 export default function MovieInfoView(params: Props): JSX.Element | null {
   const { t } = useTranslation();
-  const { overview, runtime, release_date, genres } = params.movie;
+  const { overview, runtime = 0, release_date, genres } = params.movie;
 
   return (
     <View style={[styles.container]}>
       <Text style={styles.sectionTitle}>{t("movie_details")}</Text>
       {overview && <Text>{overview}</Text>}
-      {runtime && (
-        <DescItem title={t("duration")} desc={getFormattedRuntime(runtime)} />
-      )}
       {release_date && (
         <DescItem title={t("release_date")} desc={release_date} />
+      )}
+      {runtime !== 0 && (
+        <DescItem title={t("duration")} desc={getFormattedRuntime(runtime)} />
       )}
       {genres && genres.length > 0 && (
         <DescItem
